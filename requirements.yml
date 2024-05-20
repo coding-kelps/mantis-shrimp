@@ -1,0 +1,9 @@
+---
+# requirements.yml define all the module collection needed by the playbook
+# Those dependencies can be installed using this command:
+#
+# ansible-galaxy install -fr requirements.yml
+#
+collections:
+  - name: community.docker
+    version: '3.10.0'

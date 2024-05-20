@@ -1,0 +1,7 @@
+---
+- name: Setup Prometheus server
+  hosts: prometheus_node
+  gather_facts: false
+  roles:
+    - prometheus
+

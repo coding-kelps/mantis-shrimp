@@ -1,0 +1,11 @@
+---
+# The base container image of the Prometheus server
+# There is actually several images of Prometheus
+prometheus__image: ubuntu/prometheus
+# The container image tag (~ version) of the Prometheus server
+# latest version to date (20-05-2024): https://hub.docker.com/r/ubuntu/prometheus
+prometheus__image_tag: 2.33-22.04_beta
+# The timezone of the Prometheus server
+prometheus__timezone: UTC
+# The exposed port of Prometheus server container
+prometheus__exposed_port: 9090

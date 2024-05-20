@@ -1,0 +1,16 @@
+---
+- name: Remove Prometheus server container
+  community.docker.docker_container:
+    name: prometheus
+    state: absent
+
+- name: Remove Prometheus server data storing Docker volume
+  community.docker.docker_volume:
+    name: prometheus
+    state: absent
+
+- name: Create Prometheus configuration directory on host
+  ansible.builtin.file:
+    path: /etc/mantis-shrimp/prometheus
+    state: absent
+  become: true

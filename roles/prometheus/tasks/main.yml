@@ -1,0 +1,40 @@
+---
+- name: Create Prometheus configuration directory on host
+  ansible.builtin.file:
+    path: /etc/mantis-shrimp/prometheus
+    state: directory
+    mode: '0755'
+    recurse: true
+  become: true
+
+- name: Copy Prometheus server configuration to host
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /etc/mantis-shrimp/prometheus/
+    mode: '0644'
+  loop:
+    - files/prometheus.yml
+    - files/alerts.yml
+  become: true
+
+- name: Create Prometheus server data storing Docker volume
+  community.docker.docker_volume:
+    name: prometheus
+    state: present
+
+- name: Start Prometheus server container
+  community.docker.docker_container:
+    name: prometheus
+    image: "{{ prometheus__image }}:{{ prometheus__image_tag }}"
+    restart_policy: unless-stopped
+    env: 
+      TZ: "{{ prometheus__timezone }}"
+    ports:
+      - "9090:{{ prometheus__exposed_port }}"
+    volumes:
+      - /etc/mantis-shrimp/prometheus:/etc/prometheus
+      - prometheus:/prometheus
+    state: started
+    # Will recreate any running Prometheus server container that doesn't match the expected version
+    recreate: true
+    restart: false
