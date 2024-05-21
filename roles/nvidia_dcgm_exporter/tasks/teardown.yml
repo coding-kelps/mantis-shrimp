@@ -1,0 +1,30 @@
+---
+- name: Remove Nvidia DCGM metrics exporter container
+  community.docker.docker_container:
+    name: nvidia-dgcm
+    state: absent
+
+- name: Remove Nvidia Container Toolkit apt package
+  ansible.builtin.apt:
+    name: nvidia-container-toolkit
+    state: absent
+    autoremove: true
+    purge: true
+  become: true
+
+- name: Remove Nvidia Container Toolkit from apt repository source list
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    state: absent
+  become: true
+
+- name: Update apt repository cache
+  ansible.builtin.apt:
+    update_cache: yes
+  become: true
+
+- name: Remove Nvidia Container Toolkit repository key
+  ansible.builtin.file:
+    path: /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+    state: absent
+  become: true

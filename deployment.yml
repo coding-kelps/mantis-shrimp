@@ -1,7 +1,8 @@
 ---
-- name: Setup Prometheus server
-  hosts: prometheus_node
+- name: Setup Mantis Shrimp Monitoring Stack
+  hosts: all
   gather_facts: false
   roles:
+    - nvidia_dcgm_exporter
     - prometheus
 

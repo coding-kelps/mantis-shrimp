@@ -1,18 +1,19 @@
 ---
-- name: Teardown Prometheus server
-  hosts: prometheus_node
+- name: Teardown Mantis Shrimp Monitoring Stack
+  hosts: all
   gather_facts: false
   tasks:
     - name: Teardown Prometheus server
       ansible.builtin.import_role:
         name: prometheus
         tasks_from: teardown
+        
+    - name: Teardown Nvidia DCGM metrics exporter
+      ansible.builtin.import_role:
+        name: nvidia_dcgm_exporter
+        tasks_from: teardown
 
-- name: Remove Mantis Shrimp Stack Artefacts
-  hosts: all
-  gather_facts: false
-  tasks:
-    - name: Remove artefact directory
+    - name: Mantis Shrimp Stack Artefacts
       ansible.builtin.file:
         path: /etc/mantis-shrimp
         state: absent
