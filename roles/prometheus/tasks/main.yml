@@ -35,6 +35,7 @@
       - /etc/mantis-shrimp/prometheus:/etc/prometheus
       - prometheus:/prometheus
     state: started
-    # Will recreate any running Prometheus server container that doesn't match the expected version
+    # Will recreate any running Prometheus server container
+    # that doesn't match the expected version
     recreate: true
     restart: false
