@@ -38,9 +38,9 @@
     name: nvidia-dcgm-exporter
     image: "{{ nvidia_dcgm_exporter__image }}:{{ nvidia_dcgm_exporter__image_tag }}"
     restart_policy: unless-stopped
-    ports:
-      - "9400:{{ nvidia_dcgm_exporter__exposed_port }}"
     state: started
+    networks:
+      - name: mantis_shrimp
     # Will recreate any running Nvidia DCGM metrics exporter
     # container that doesn't match the expected version
     recreate: true

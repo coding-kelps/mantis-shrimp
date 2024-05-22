@@ -14,7 +14,6 @@
     mode: '0644'
   loop:
     - files/prometheus.yml
-    - files/alerts.yml
   become: true
 
 - name: Create Prometheus server data storing Docker volume
@@ -29,11 +28,11 @@
     restart_policy: unless-stopped
     env: 
       TZ: "{{ prometheus__timezone }}"
-    ports:
-      - "9090:{{ prometheus__exposed_port }}"
     volumes:
       - /etc/mantis-shrimp/prometheus:/etc/prometheus
       - prometheus:/prometheus
+    networks:
+      - name: mantis_shrimp
     state: started
     # Will recreate any running Prometheus server container
     # that doesn't match the expected version
