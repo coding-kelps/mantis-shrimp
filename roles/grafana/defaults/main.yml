@@ -1,0 +1,7 @@
+---
+# The base container image of the Grafana server
+grafana__image: grafana/grafana
+# The container image tag (~ version) of the Grafana server
+grafana__image_tag: 10.1.10
+# The domain name to access the Grafana server
+grafana__dns: grafana.example.com

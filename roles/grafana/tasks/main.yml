@@ -1,0 +1,49 @@
+---
+- name: Create Grafana configuration directories on host
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    recurse: true
+  loop:
+    - /etc/mantis-shrimp/grafana/provisioning/datasources
+    - /etc/mantis-shrimp/grafana/provisioning/dashboards
+  become: true
+
+- name: Copy Grafana server configuration to host
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  with_items:
+    - { src: 'files/datasources.yml', dest: '/etc/mantis-shrimp/grafana/provisioning/datasources/' }
+  become: true
+
+- name: Create Grafana server data storing Docker volume
+  community.docker.docker_volume:
+    name: grafana
+    state: present
+
+- name: Start Grafana server container
+  community.docker.docker_container:
+    name: grafana
+    image: "{{ grafana__image }}:{{ grafana__image_tag }}"
+    restart_policy: unless-stopped
+    volumes:
+      - /etc/mantis-shrimp/grafana/provisioning/:/etc/grafana/provisioning
+      - grafana:/var/lib/grafana
+    networks:
+      - name: mantis_shrimp
+    state: started
+    # Will recreate any running Prometheus server container
+    # that doesn't match the expected version
+    recreate: true
+    restart: false
+    # Labels are here to be parsed then by Traefik to configure its routing.
+    # Traefik can only parse string value to all number and boolean should be
+    # converted to string
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.web-http.entrypoints: web
+      traefik.http.services.web.loadbalancer.server.port: "3000"
+      traefik.http.routers.web-http.rule: Host(`{{ grafana__dns }}`)

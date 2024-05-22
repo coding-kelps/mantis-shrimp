@@ -1,0 +1,16 @@
+---
+- name: Remove Grafana server container
+  community.docker.docker_container:
+    name: grafana
+    state: absent
+
+- name: Remove Prometheus server data storing Docker volume
+  community.docker.docker_volume:
+    name: grafana
+    state: absent
+
+- name: Create Grafana configuration directory on host
+  ansible.builtin.file:
+    path: /etc/mantis-shrimp/grafana
+    state: absent
+  become: true
