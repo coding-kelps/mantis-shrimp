@@ -3,6 +3,16 @@
   hosts: all
   gather_facts: false
   tasks:
+    - name: Teardown Traefik reverse proxy
+      ansible.builtin.import_role:
+        name: traefik
+        tasks_from: teardown
+
+    - name: Teardown Grafana server
+      ansible.builtin.import_role:
+        name: grafana
+        tasks_from: teardown
+
     - name: Teardown Prometheus server
       ansible.builtin.import_role:
         name: prometheus
@@ -18,3 +28,8 @@
         path: /etc/mantis-shrimp
         state: absent
       become: true
+
+    - name: Remove mantis-shrimp Docker network
+      community.docker.docker_network:
+        name: mantis_shrimp
+        state: absent

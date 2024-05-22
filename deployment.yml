@@ -2,7 +2,16 @@
 - name: Setup Mantis Shrimp Monitoring Stack
   hosts: all
   gather_facts: false
+  pre_tasks:
+    - name: Create mantis-shrimp Docker network
+      community.docker.docker_network:
+        name: mantis_shrimp
+        driver: bridge
+        internal: false
+        state: present
   roles:
     - nvidia_dcgm_exporter
     - prometheus
+    - grafana
+    - traefik
 
