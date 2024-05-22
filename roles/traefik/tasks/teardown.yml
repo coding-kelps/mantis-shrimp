@@ -1,0 +1,5 @@
+---
+- name: Remove traefik reverse proxy server docker container
+  community.docker.docker_container:
+    name: traefik
+    state: absent

@@ -1,0 +1,35 @@
+---
+- name: Create Grafana configuration directories on host
+  ansible.builtin.file:
+    path: /etc/mantis-shrimp/traefik
+    state: directory
+    mode: '0755'
+    recurse: true
+  become: true
+
+- name: Copy traefik configuration to host
+  ansible.builtin.copy:
+    src: files/traefik.yml
+    dest: /etc/mantis-shrimp/traefik/traefik.yml
+    mode: '0644'
+  become: true
+
+- name: Start traefik reverse proxy server docker container
+  community.docker.docker_container:
+    name: traefik
+    image: "{{ traefik__image }}:{{ traefik__image_tag }}"
+    restart_policy: unless-stopped
+    # The Traefik reverse proxy should be the only container with exposed ports
+    ports:
+      - "80:80"
+    volumes:
+      - /etc/mantis-shrimp/traefik/traefik.yml:/etc/traefik/traefik.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - name: mantis_shrimp
+    labels:
+      traefik.http.routers.dashboard.rule: Host(`{{ traefik__dns }}`)
+      traefik.http.routers.dashboard.service: dashboard@internal
+    state: started
+    recreate: true # Always recreate to ensure version upgrade
+    restart: false

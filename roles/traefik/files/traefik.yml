@@ -1,0 +1,20 @@
+---
+# Logging configuration
+log:
+  level: INFO
+
+api:
+  insecure: true # Temporary set to true until traefik is a bit well-known
+  dashboard: true
+
+# Define the entrypoints of the reverse proxy
+entryPoints:
+  web:
+    address: ":80"
+
+# Define how Traefik will look for servers to route to
+providers:
+  docker:
+    endpoint: unix:///var/run/docker.sock
+    watch: true
+    exposedByDefault: false

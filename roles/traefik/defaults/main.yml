@@ -1,0 +1,7 @@
+---
+# The base image of the Traefik reverse proxy
+traefik__image: traefik
+# The image tag (~ version) of the Traefik reverse proxy
+traefik__image_tag: beaufort
+# The domain name of the Traefik reverse proxy
+traefik__dns: traefik.example.com
