@@ -8,10 +8,11 @@
         name: mantis_shrimp
         driver: bridge
         internal: false
+        scope: global
         state: present
   roles:
     - nvidia_dcgm_exporter
     - prometheus
     - grafana
-    - traefik
+    - { name: traefik, tags: traefik }
 
