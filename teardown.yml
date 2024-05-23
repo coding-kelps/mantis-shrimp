@@ -22,6 +22,11 @@
       ansible.builtin.import_role:
         name: nvidia_dcgm_exporter
         tasks_from: teardown
+        
+    - name: Teardown cAdvisor metrics exporter
+      ansible.builtin.import_role:
+        name: cadvisor
+        tasks_from: teardown
 
     - name: Mantis Shrimp Stack Artefacts
       ansible.builtin.file:

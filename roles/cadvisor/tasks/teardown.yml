@@ -1,0 +1,5 @@
+---
+- name: Remove cAdvisor metrics exporter docker container
+  community.docker.docker_container:
+    name: cadvisor
+    state: absent

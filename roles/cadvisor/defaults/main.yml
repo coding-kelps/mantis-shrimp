@@ -1,0 +1,5 @@
+---
+# The base container image of the cAdvisor metrics exporter
+cadvisor__image: gcr.io/cadvisor/cadvisor
+# The container image tag (~ version) of the cadvisor metrics exporter
+cadvisor__image_tag: v0.49.1

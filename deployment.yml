@@ -12,6 +12,7 @@
         state: present
   roles:
     - nvidia_dcgm_exporter
+    - cadvisor
     - prometheus
     - grafana
     - { name: traefik, tags: traefik }

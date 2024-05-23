@@ -1,0 +1,18 @@
+---
+- name: Start cAvisor metrics exporter container
+  community.docker.docker_container:
+    name: cadvisor
+    image: "{{ cadvisor__image }}:{{ cadvisor__image_tag }}"
+    restart_policy: unless-stopped
+    state: started
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - name: mantis_shrimp
+    # Will recreate any running Nvidia DCGM metrics exporter
+    # container that doesn't match the expected version
+    recreate: true
+    restart: false
