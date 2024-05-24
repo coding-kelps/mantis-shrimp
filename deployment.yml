@@ -11,9 +11,15 @@
         scope: global
         state: present
   roles:
-    - nvidia_dcgm
-    - cadvisor
-    - prometheus
-    - grafana
-    - { name: traefik, tags: traefik }
+    - name: nvidia_dcgm
+      tags:
+        - exporter
+    - name: cadvisor
+      tags:
+        - exporter
+    - name: prometheus
+    - name: grafana
+    - name: traefik
+      tags:
+        - traefik
 
