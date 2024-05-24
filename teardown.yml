@@ -20,7 +20,7 @@
         
     - name: Teardown Nvidia DCGM metrics exporter
       ansible.builtin.import_role:
-        name: nvidia_dcgm_exporter
+        name: nvidia_dcgm
         tasks_from: teardown
         
     - name: Teardown cAdvisor metrics exporter

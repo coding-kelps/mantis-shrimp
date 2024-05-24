@@ -11,7 +11,7 @@
         scope: global
         state: present
   roles:
-    - nvidia_dcgm_exporter
+    - nvidia_dcgm
     - cadvisor
     - prometheus
     - grafana

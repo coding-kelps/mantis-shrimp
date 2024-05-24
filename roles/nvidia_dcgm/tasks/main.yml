@@ -36,7 +36,7 @@
 - name: Start Nvidia DCGM metrics exporter container
   community.docker.docker_container:
     name: nvidia-dcgm-exporter
-    image: "{{ nvidia_dcgm_exporter__image }}:{{ nvidia_dcgm_exporter__image_tag }}"
+    image: "{{ nvidia_dcgm__image }}:{{ nvidia_dcgm__image_tag }}"
     restart_policy: unless-stopped
     state: started
     networks:

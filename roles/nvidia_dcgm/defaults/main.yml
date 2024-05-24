@@ -1,5 +1,5 @@
 ---
 # The base container image of the Nvidia DCGM metrics exporter
-nvidia_dcgm_exporter__image: nvidia/dcgm-exporter
+nvidia_dcgm__image: nvidia/dcgm-exporter
 # The container image tag (~ version) of the nvidia_dcgm metrics exporter
-nvidia_dcgm_exporter__image_tag: 3.3.6-3.4.2-ubuntu22.04
+nvidia_dcgm__image_tag: 3.3.6-3.4.2-ubuntu22.04
