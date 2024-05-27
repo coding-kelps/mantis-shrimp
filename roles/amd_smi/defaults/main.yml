@@ -1,0 +1,12 @@
+# The git tag to download the amd/amd_hsmp repository from
+amd_smi__amd_hsmp_version: HEAD
+# The git tag to download the LLNL/msr-safe repository from
+amd_smi__msr_safe_version: v1.7.0
+# The git tag to download the ROCm/rocm_smi_lib repository from
+amd_smi_rocm_rocm_smi_lib_version: rocm-6.1.1
+# The git tag to download the amd/esmi_ib_library repository from
+amd_smi__amd_esmi_ib_library_version: esmi_pkg_ver-3.0.3
+# The git tag to download the amd/go_amd_smi repository from
+amd_smi__amd_go_amd_smi: HEAD
+#  The git tag to download the amd/amd_smi_exporter repository from
+amd_smi_amd_amd_smi_exporter: HEAD

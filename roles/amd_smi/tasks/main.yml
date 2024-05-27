@@ -1,0 +1,224 @@
+---
+- name: Ensure that packages "make" and "cmake" are installed
+  ansible.builtin.apt:
+    name:
+      - build-essentials
+      - cmake
+    state: present
+
+---
+- name: Clone amd/amd_hsmp repository
+  ansible.builtin.git:
+    repo: https://github.com/amd/amd_hsmp.git
+    dest: /usr/local/src/
+    version: "{{ amd_smi__amd_hsmp_version }}"
+  become: true
+
+- name: Make "amd_hsmp" kernel module
+  community.general.make:
+    chdir: /usr/local/src/amd_hsmp
+    target: all
+  become: true
+
+- name: Install "amd_hsmp" kernel module
+  community.general.make:
+    chdir: /usr/local/src/amd_hsmp
+    target: modules_install
+  become: true
+
+- name: Load "amd_hsmp" kernel module
+  community.general.modprobe:
+    name: amd_hsmp
+    state: present
+  become: true
+
+- name: Clean "amd_hsmp" installation artefacts
+  community.general.make:
+    chdir: /usr/local/src/amd_hsmp
+    target: clean
+  become: true
+
+---
+- name: Clone LLNL/msr-safe repository
+  ansible.builtin.git:
+    repo: https://github.com/LLNL/msr-safe.git
+    dest: /usr/local/src/
+    version: "{{ amd_smi__msr_safe_version }}"
+  become: true
+
+- name: Ensure groups "msr-user" and "msr-admin" exist
+  ansible.builtin.group:
+    group: "{{ item }}"
+    state: present
+  loop:
+    - msr-user
+    - msr-admin
+  become: true
+
+- name: Make msr-safe kernel module
+  community.general.make:
+    chdir: /usr/local/src/msr-safe
+    target: all
+  become: true
+
+- name: Ensure kernel module directory "extra" exists
+  ansible.builtin.file:
+    path: "/lib/modules/{{ ansible_kernel }}/extra/"
+    state: directory
+  become: true
+
+- name: Copy built "msr-safe" kernel module to extra directory
+  ansible.builtin.copy:
+    src: /usr/local/src/msr-safe/msr-safe.ko
+    dest: "/lib/modules/{{ ansible_kernel }}/extra/"
+  become: true
+
+- name: Update kernel modules
+  ansible.builtin.shell:
+    cmd: depmod -a
+  become: true
+
+- name: Add "msr-safe" kernel module
+  community.general.modprobe:
+    name: msr-safe
+    state: present
+  become: true
+
+- name: Add permissions to msr-safe user groups
+  ansible.builtin.shell:
+    cmd: "{{ item }}"
+  loop:
+    - "chgrp msr-user /dev/cpu/*/msr_safe /dev/cpu/msr_batch /dev/cpu/msr_safe_version"
+    - "chgrp msr-admin /dev/cpu/msr_allowlist"
+  become: true
+
+---
+- name: Create temporary "rocm_smi_lib" directory
+  ansible.builtin.file:
+    path: /tmp/rocm_smi_lib
+    state: directory
+
+- name: Get "amdgpu" package
+  ansible.builtin.get_url:
+    url: "http://repo.radeon.com/amdgpu-install/6.1.1/ubuntu/jammy/amdgpu-install_6.1.60101-1_all.deb"
+    dest: /tmp/rocm_smi_lib
+  become: true
+
+- name: Install "amdgpu" debian package
+  ansible.builtin.apt:
+    deb: /tmp/rocm_smi_lib/amdgpu-install_6.1.60101-1_all.deb
+  become: true
+
+- name: Install "rocm" through "amdgpu"
+  ansible.builtin.shell:
+    cmd: amdgpu-install --usecase=rocm
+  become: true
+
+# Necessary to enable backward compatibility
+# => https://github.com/amd/go_amd_smi/pull/5
+- name: Create symbolic link in library
+  ansible.builtin.file:
+    src: /opt/rocm
+    dest: /opt/rocm/rocm_smi
+    state: link
+  become: true
+
+---
+- name: Clone amd/esmi_ib_library repository
+  ansible.builtin.git:
+    repo: https://github.com/amd/esmi_ib_library.git
+    dest: /usr/local/src/
+    version: "{{ amd_smi__amd_esmi_ib_library_version }}"
+  become: true
+
+- name: Create build directory
+  ansible.builtin.file:
+    path: /usr/local/src/esmi_ib_library/build
+    state: directory
+  become: true
+
+- name: Setup esmi build with CMake
+  ansible.builtin.shell:
+    cmd: cmake -DROCM_DEP_ROCMCORE=ON ../
+    chdir: /usr/local/src/esmi_ib_library/build
+  become: true
+
+- name: Make esmi library
+  community.general.make:
+    chdir: /usr/local/src/rocm_smi_lib/build
+    target: package
+  become: true
+
+- name: Install "e_smi_lib64" debian package
+  ansible.builtin.apt:
+    deb: /usr/local/src/esmi/ib_library/e_smi_lib64_3.0.3.11.local-build-0-1cc7a25_amd64.deb
+  become: true
+
+---
+- name: Clone amd/go_amd_smi repository
+  ansible.builtin.git:
+    repo: https://github.com/amd/go_amd_smi.git
+    dest: /usr/local/src/
+    version: "{{ amd_smi__amd_go_amd_smi }}"
+  become: true
+
+- name: Get "go" package
+  ansible.builtin.get_url:
+    url: "https://go.dev/dl/go1.22.3.linux-amd64.tar.gz"
+    dest: /tmp
+
+- name: Unarchive "go" package
+  ansible.builtin.unarchive:
+    src: /tmp/go1.22.3.linux-amd64.tar.gz
+    dest: /usr/local/
+  become: true
+
+- name: Create build directory
+  ansible.builtin.file:
+    path: /usr/local/src/go_amd_smi/build
+    state: directory
+  become: true
+
+- name: Setup go_amd_smi build with CMake
+  ansible.builtin.shell:
+    cmd: cmake cmake -C ../amd_smi.cmake ../
+    chdir: /usr/local/src/go_amd_smi/build
+  become: true
+
+- name: Make go_amd_smi library
+  community.general.make:
+    chdir: /usr/local/src/go_amd_smi/build
+    target: all
+  become: true
+
+- name: Install go_amd_smi library
+  community.general.make:
+    chdir: /usr/local/src/go_amd_smi/build
+    target: install
+  become: true
+
+---
+- name: Clone amd/amd_smi_exporter repository
+  ansible.builtin.git:
+    repo: https://github.com/amd/amd_smi_exporter.git
+    dest: /usr/local/src/
+    version: "{{ amd_smi_amd_amd_smi_exporter }}"
+  become: true
+
+- name: Setup amd_smi_exporter
+  community.general.make:
+    chdir: /usr/local/src/go_amd_smi/src
+    target: clean
+  become: true
+
+- name: Setup amd_smi_exporter
+  community.general.make:
+    chdir: /usr/local/src/go_amd_smi/src
+    target: all
+  become: true
+
+- name: Build "amd_smi_exporter_container" Docker image
+  community.general.make:
+    chdir: /usr/local/src/go_amd_smi/src
+    target: install
+  become: true

@@ -1,7 +1,7 @@
 ---
 - name: Setup Mantis Shrimp Monitoring Stack
   hosts: all
-  gather_facts: false
+  gather_facts: true
   pre_tasks:
     - name: Create mantis-shrimp Docker network
       community.docker.docker_network:
