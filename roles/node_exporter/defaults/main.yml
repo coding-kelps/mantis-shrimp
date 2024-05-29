@@ -1,0 +1,5 @@
+---
+# The base container image of the node metrics exporter
+node_exporter__image: quay.io/prometheus/node-exporter
+# The container image tag (~ version) of the node metrics exporter
+node_exporter__image_tag: v1.8.1

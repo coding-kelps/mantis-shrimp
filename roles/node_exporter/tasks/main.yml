@@ -1,0 +1,16 @@
+---
+- name: Start node metrics exporter container
+  community.docker.docker_container:
+    name: node-exporter
+    image: "{{ node_exporter__image }}:{{ node_exporter__image_tag }}"
+    restart_policy: unless-stopped
+    command: --path.rootfs=/host
+    volumes:
+      - /:/host:ro
+    network_mode: host
+    pid_mode: host
+    state: started
+    # Will recreate any running Nvidia DCGM metrics exporter
+    # container that doesn't match the expected version
+    recreate: true
+    restart: false

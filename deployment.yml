@@ -14,7 +14,12 @@
     - name: nvidia_dcgm
       tags:
         - exporter
+        - gpu-metrics
     - name: cadvisor
+      tags:
+        - exporter
+        - container-metrics
+    - name: node_exporter
       tags:
         - exporter
     - name: prometheus

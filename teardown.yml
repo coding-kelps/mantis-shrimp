@@ -7,6 +7,8 @@
       ansible.builtin.import_role:
         name: traefik
         tasks_from: teardown
+      tags:
+        - traefik
 
     - name: Teardown Grafana server
       ansible.builtin.import_role:
@@ -17,16 +19,29 @@
       ansible.builtin.import_role:
         name: prometheus
         tasks_from: teardown
-        
-    - name: Teardown Nvidia DCGM metrics exporter
+
+    - name: Teardown node metrics exporter
       ansible.builtin.import_role:
-        name: nvidia_dcgm
+        name: node_exporter
         tasks_from: teardown
+      tags:
+        - exporter
         
     - name: Teardown cAdvisor metrics exporter
       ansible.builtin.import_role:
         name: cadvisor
         tasks_from: teardown
+      tags:
+        - exporter
+        - container-metrics
+        
+    - name: Teardown Nvidia DCGM metrics exporter
+      ansible.builtin.import_role:
+        name: nvidia_dcgm
+        tasks_from: teardown
+      tags:
+        - exporter
+        - gpu-metrics
 
     - name: Mantis Shrimp Stack Artefacts
       ansible.builtin.file:

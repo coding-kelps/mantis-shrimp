@@ -26,13 +26,13 @@
     name: prometheus
     image: "{{ prometheus__image }}:{{ prometheus__image_tag }}"
     restart_policy: unless-stopped
-    env: 
-      TZ: "{{ prometheus__timezone }}"
     volumes:
       - /etc/mantis-shrimp/prometheus:/etc/prometheus
       - prometheus:/prometheus
     networks:
       - name: mantis_shrimp
+    etc_hosts:
+      host.docker.internal: host-gateway
     state: started
     # Will recreate any running Prometheus server container
     # that doesn't match the expected version

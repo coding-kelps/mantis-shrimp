@@ -1,4 +1,5 @@
 ---
+# AMD SMI Exporter
 - name: Delete "amd-smi-exporter" metrics exporter Docker container
   community.docker.docker_container:
     name: amd-smi-exporter
@@ -16,7 +17,7 @@
     state: absent
   become: true
 
----
+# GO AMD SMI Bindings
 - name: Delete "go_amd_smi" installation artefacts
   ansible.builtin.file:
     path: "{{ item }}"
@@ -28,9 +29,9 @@
 
 - name: Clean Go Cache
   ansible.builtin.shell:
-    command: "go clean -modcache"
+    cmd: "/usr/local/go/bin/go clean -modcache"
 
----
+# E SMI LIB
 - name: Remove "e_smi_lib64" debian package
   ansible.builtin.apt:
     name: e_smi_lib64
@@ -46,13 +47,13 @@
     state: absent
   become: true
 
----
+# ROCM SMI LIB
 - name: Remove
   ansible.builtin.shell:
-    command: "amdgpu-uninstall --usecase=rocm"
+    cmd: "amdgpu-install --uninstall --usecase=rocm"
   become: true
 
-- name: Remove "e_smi_lib64" debian package
+- name: Remove "amdgpu" debian package
   ansible.builtin.apt:
     name:
     - amdgpu
@@ -68,7 +69,7 @@
     state: absent
   become: true
 
----
+# MSR-SAFE
 - name: Delete groups "msr-user" and "msr-admin"
   ansible.builtin.group:
     group: "{{ item }}"
@@ -78,30 +79,28 @@
     - msr-admin
   become: true
 
-- name: Remove "msr-safe" kernel module
-  community.general.modprobe:
-    name: msr-safe
-    state: absent
-  become: true
-
-- name: Delete "msr-safe" kernel module to extra directory
-  ansible.builtin.file:
-    path: "/lib/modules/{{ ansible_kernel }}/extra/msr-safe/ko"
-    state: absent
-  become: true
-
-- name: Update kernel modules
+- name: Unload "msr-safe" kernel module
   ansible.builtin.shell:
-    cmd: depmod -a
+    cmd: rmmod msr-safe
   become: true
+
+# TO DO REMOVE INSTALLATION ARTEFACTS FROM /lib/modules
 
 - name: Delete "msr-safe" installation artefacts
   ansible.builtin.file:
-    path: /usr/local/src/msr-safe
+    path: "{{ item }}"
     state: absent
+  loop:
+    - /usr/local/src/msr-safe
+    - 
   become: true
 
----
+- name: Update kernel module dependencies
+  ansible.builtin.shell:
+    cmd: depmod -A
+  become: true
+
+# AMD HSMP
 - name: Unload "amd_hsmp" kernel module
   community.general.modprobe:
     name: amd_hsmp
@@ -110,6 +109,14 @@
 
 - name: Delete "amd_hsmp" installation artefacts
   ansible.builtin.file:
-    path: /usr/local/src/amd_hsmp
+    path: "{{ item }}"
     state: absent
+  loop:
+    - /usr/local/src/amd_hsmp
+    - "/usr/lib/modules/{{ ansible_kernel }}/updates/amd_hsmp.ko"
+  become: true
+
+- name: Update kernel module dependencies
+  ansible.builtin.shell:
+    cmd: depmod -A
   become: true

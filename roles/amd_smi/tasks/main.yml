@@ -1,29 +1,34 @@
 ---
+# Preparation
 - name: Ensure that packages "make" and "cmake" are installed
   ansible.builtin.apt:
     name:
-      - build-essentials
+      - build-essential
       - cmake
     state: present
 
----
+# AMD HSMP
 - name: Clone amd/amd_hsmp repository
   ansible.builtin.git:
     repo: https://github.com/amd/amd_hsmp.git
-    dest: /usr/local/src/
+    dest: /usr/local/src/amd_hsmp
     version: "{{ amd_smi__amd_hsmp_version }}"
   become: true
 
 - name: Make "amd_hsmp" kernel module
   community.general.make:
     chdir: /usr/local/src/amd_hsmp
-    target: all
   become: true
 
 - name: Install "amd_hsmp" kernel module
   community.general.make:
     chdir: /usr/local/src/amd_hsmp
     target: modules_install
+  become: true
+
+- name: Update kernel module dependencies
+  ansible.builtin.shell:
+    cmd: depmod -A
   become: true
 
 - name: Load "amd_hsmp" kernel module
@@ -38,17 +43,17 @@
     target: clean
   become: true
 
----
+# MSR-SAFE
 - name: Clone LLNL/msr-safe repository
   ansible.builtin.git:
     repo: https://github.com/LLNL/msr-safe.git
-    dest: /usr/local/src/
+    dest: /usr/local/src/msr-safe
     version: "{{ amd_smi__msr_safe_version }}"
   become: true
 
 - name: Ensure groups "msr-user" and "msr-admin" exist
   ansible.builtin.group:
-    group: "{{ item }}"
+    name: "{{ item }}"
     state: present
   loop:
     - msr-user
@@ -61,38 +66,21 @@
     target: all
   become: true
 
-- name: Ensure kernel module directory "extra" exists
-  ansible.builtin.file:
-    path: "/lib/modules/{{ ansible_kernel }}/extra/"
-    state: directory
-  become: true
-
 - name: Copy built "msr-safe" kernel module to extra directory
-  ansible.builtin.copy:
-    src: /usr/local/src/msr-safe/msr-safe.ko
-    dest: "/lib/modules/{{ ansible_kernel }}/extra/"
-  become: true
-
-- name: Update kernel modules
   ansible.builtin.shell:
-    cmd: depmod -a
-  become: true
-
-- name: Add "msr-safe" kernel module
-  community.general.modprobe:
-    name: msr-safe
-    state: present
+    cmd: insmod /usr/local/src/msr-safe/msr-safe.ko
   become: true
 
 - name: Add permissions to msr-safe user groups
   ansible.builtin.shell:
     cmd: "{{ item }}"
   loop:
+    - "chmod g+rw /dev/cpu/*/msr_safe /dev/cpu/msr_*"
     - "chgrp msr-user /dev/cpu/*/msr_safe /dev/cpu/msr_batch /dev/cpu/msr_safe_version"
     - "chgrp msr-admin /dev/cpu/msr_allowlist"
   become: true
 
----
+# ROCM SMI LIB
 - name: Create temporary "rocm_smi_lib" directory
   ansible.builtin.file:
     path: /tmp/rocm_smi_lib
@@ -123,11 +111,11 @@
     state: link
   become: true
 
----
+# E SMI LIB
 - name: Clone amd/esmi_ib_library repository
   ansible.builtin.git:
     repo: https://github.com/amd/esmi_ib_library.git
-    dest: /usr/local/src/
+    dest: /usr/local/src/esmi_ib_library
     version: "{{ amd_smi__amd_esmi_ib_library_version }}"
   become: true
 
@@ -154,23 +142,20 @@
     deb: /usr/local/src/esmi/ib_library/e_smi_lib64_3.0.3.11.local-build-0-1cc7a25_amd64.deb
   become: true
 
----
+# GO AMD SMI BINDING
 - name: Clone amd/go_amd_smi repository
   ansible.builtin.git:
     repo: https://github.com/amd/go_amd_smi.git
-    dest: /usr/local/src/
+    dest: /usr/local/src/go_amd_smi
     version: "{{ amd_smi__amd_go_amd_smi }}"
   become: true
 
-- name: Get "go" package
-  ansible.builtin.get_url:
-    url: "https://go.dev/dl/go1.22.3.linux-amd64.tar.gz"
-    dest: /tmp
-
-- name: Unarchive "go" package
-  ansible.builtin.unarchive:
-    src: /tmp/go1.22.3.linux-amd64.tar.gz
-    dest: /usr/local/
+- name: Ensure "go" is installed
+  ansible.builtin.import_role:
+    name: gantsign.golang
+  vars:
+    golang_version: "1.22.3"
+    golang_redis_sha256sum: 8920ea521bad8f6b7bc377b4824982e011c19af27df88a815e3586ea895f1b36
   become: true
 
 - name: Create build directory
@@ -196,15 +181,7 @@
     chdir: /usr/local/src/go_amd_smi/build
     target: install
   become: true
-
----
-- name: Clone amd/amd_smi_exporter repository
-  ansible.builtin.git:
-    repo: https://github.com/amd/amd_smi_exporter.git
-    dest: /usr/local/src/
-    version: "{{ amd_smi_amd_amd_smi_exporter }}"
-  become: true
-
+ 
 - name: Setup amd_smi_exporter
   community.general.make:
     chdir: /usr/local/src/go_amd_smi/src

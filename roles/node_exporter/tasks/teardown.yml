@@ -1,0 +1,5 @@
+---
+- name: Remove node metrics exporter docker container
+  community.docker.docker_container:
+    name: node-exporter
+    state: absent
