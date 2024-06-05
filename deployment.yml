@@ -8,7 +8,7 @@
         name: mantis_shrimp
         driver: bridge
         internal: false
-        scope: global
+        scope: local
         state: present
   roles:
     - name: nvidia_dcgm
