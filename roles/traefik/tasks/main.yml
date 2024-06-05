@@ -29,9 +29,9 @@
       - name: mantis_shrimp
     labels:
       traefik.enable: "true"
-      traefik.http.routers.api.rule: Host(`{{ traefik__dns }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
-      traefik.http.routers.api.entrypoints: web
-      traefik.http.routers.api.service: api@internal
+      traefik.http.routers.web-api.rule: Host(`{{ traefik__dns }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      traefik.http.routers.web-api.entrypoints: web
+      traefik.http.routers.web-api.service: api@internal
     state: started
     recreate: true # Always recreate to ensure version upgrade
     restart: false
