@@ -22,6 +22,7 @@
     # The Traefik reverse proxy should be the only container with exposed ports
     ports:
       - "80:80"
+      - "7687:7687"
     volumes:
       - /etc/mantis-shrimp/traefik/traefik.yml:/etc/traefik/traefik.yml
       - /var/run/docker.sock:/var/run/docker.sock

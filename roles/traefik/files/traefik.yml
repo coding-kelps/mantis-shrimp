@@ -11,6 +11,8 @@ api:
 entryPoints:
   web:
     address: ":80"
+  bolt:
+    address: ":7687"
 
 # Define how Traefik will look for servers to route to
 providers:
