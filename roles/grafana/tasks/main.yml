@@ -35,7 +35,7 @@
     networks:
       - name: mantis_shrimp
     state: started
-    # Will recreate any running Prometheus server container
+    # Will recreate any running Grafana server container
     # that doesn't match the expected version
     recreate: true
     restart: false
