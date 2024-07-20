@@ -23,7 +23,17 @@
       tags:
         - exporter
     - name: prometheus
+      tags:
+        - monitoring
+        - prometheus
     - name: grafana
+      tags:
+        - monitoring
+        - grafana
+    - name: jupyter
+      tags:
+        - machine-learning
+        - jupyter
     - name: traefik
       tags:
         - traefik

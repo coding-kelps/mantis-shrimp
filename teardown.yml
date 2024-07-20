@@ -10,6 +10,11 @@
       tags:
         - traefik
 
+    - name: Teardown Jupyter server
+      ansible.builtin.import_role:
+        name: jupyter
+        tasks_from: teardown
+
     - name: Teardown Grafana server
       ansible.builtin.import_role:
         name: grafana

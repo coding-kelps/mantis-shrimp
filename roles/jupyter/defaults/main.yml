@@ -1,0 +1,7 @@
+---
+# The base container image of the Jupyter server
+jupyter__image: quay.io/jupyter/tensorflow-notebook
+# The container image tag (~ version) of the Jupyter server
+jupyter__image_tag: cuda-ubuntu-22.04
+# The domain name to access the Jupyter server
+jupyter__dns: jupyter.example.com

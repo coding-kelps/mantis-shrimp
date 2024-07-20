@@ -1,0 +1,28 @@
+- name: Start Jupyter server container
+  community.docker.docker_container:
+    name: jupyter
+    image: "{{ jupyter__image }}:{{ jupyter__image_tag }}"
+    restart_policy: unless-stopped
+    networks:
+      - name: mantis_shrimp
+    state: started
+    # Will recreate any running Jupyter server container
+    # that doesn't match the expected version
+    recreate: true
+    restart: false
+    # Enable container access to GPU resources
+    device_requests: 
+      - device_ids: 0
+        driver: nvidia
+        capabilities: 
+          - gpu
+          - compute
+          - utility
+    # Labels are here to be parsed then by Traefik to configure its routing.
+    # Traefik can only parse string value to all number and boolean should be
+    # converted to string
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.web-jupyter.entrypoints: web
+      traefik.http.services.jupyter.loadbalancer.server.port: "8888"
+      traefik.http.routers.web-jupyter.rule: Host(`{{ jupyter__dns }}`)
